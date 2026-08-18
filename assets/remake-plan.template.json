@@ -1,0 +1,234 @@
+{
+  "schema_version": 3,
+  "workflow_mode": "variant_package",
+  "settings": {
+    "ratio": "9:16",
+    "resolution": "720p",
+    "max_segment_seconds": 15,
+    "generation_mode": "serial_tail_frame_chain",
+    "output_mode": "direct_variant_prompts"
+  },
+  "execution": {
+    "adapter": {
+      "name": "<generator-or-manual-executor>",
+      "capabilities_verified": false,
+      "verification_evidence": "<documentation-live-probe-or-visible-ui>",
+      "supports_scene_reference": null,
+      "supports_start_frame": null,
+      "supports_multiple_references": null,
+      "max_duration_seconds": null,
+      "supported_ratios": [],
+      "supported_resolutions": [],
+      "audio_mode": "<native-post-or-none>"
+    }
+  },
+  "source": {
+    "kind": "local_file",
+    "locator": "<absolute-path-url-asset-id-or-script-reference>",
+    "goal": "<user-original-remake-goal>"
+  },
+  "core_script": {
+    "id": "CORE",
+    "version": "1.0",
+    "frozen": true,
+    "source_hash": null,
+    "beats": [
+      {"id": "B01", "label": "<opening-hook>", "required": true},
+      {"id": "B02", "label": "<conflict-or-proof>", "required": true},
+      {"id": "B03", "label": "<turn-or-cta>", "required": true}
+    ],
+    "dialogue_ids": ["D01", "D02"],
+    "dialogue_texts": {"D01": "<core-dialogue-a>", "D02": "<core-dialogue-b>"},
+    "invariants": ["plot_order", "dialogue_order", "product", "cta", "duration_envelope"]
+  },
+  "variant_policy": {
+    "count": 3,
+    "allowed_axes": ["setting", "wardrobe", "camera_style"],
+    "forbidden_axes": ["plot_order", "dialogue_order", "product", "cta"],
+    "max_changed_axes_per_variant": 1
+  },
+  "variants": [
+    {
+      "id": "V01",
+      "label": "<setting-variant>",
+      "source_core_script_id": "CORE",
+      "changed_axes": ["setting"],
+      "delta": {"setting": "<approved-setting-change>"},
+      "dialogue_overrides": {},
+      "preserved_core_ids": ["B01", "B02", "B03", "D01", "D02"],
+      "generation_prompt": "<complete-variant-v01-prompt>",
+      "scene_reference_ids": ["R01"],
+      "segment_ids": ["A", "B"],
+      "status": "planned"
+    },
+    {
+      "id": "V02",
+      "label": "<wardrobe-variant>",
+      "source_core_script_id": "CORE",
+      "changed_axes": ["wardrobe"],
+      "delta": {"wardrobe": "<approved-wardrobe-change>"},
+      "dialogue_overrides": {},
+      "preserved_core_ids": ["B01", "B02", "B03", "D01", "D02"],
+      "generation_prompt": "<complete-variant-v02-prompt>",
+      "scene_reference_ids": ["R01"],
+      "segment_ids": ["A", "B"],
+      "status": "planned"
+    },
+    {
+      "id": "V03",
+      "label": "<camera-variant>",
+      "source_core_script_id": "CORE",
+      "changed_axes": ["camera_style"],
+      "delta": {"camera_style": "<approved-camera-change>"},
+      "dialogue_overrides": {},
+      "preserved_core_ids": ["B01", "B02", "B03", "D01", "D02"],
+      "generation_prompt": "<complete-variant-v03-prompt>",
+      "scene_reference_ids": ["R01"],
+      "segment_ids": ["A", "B"],
+      "status": "planned"
+    }
+  ],
+  "source_dialogue": [
+    {
+      "id": "D01",
+      "shot_id": "S01",
+      "speaker": "<speaker-a>",
+      "text": "<source-dialogue-a>"
+    },
+    {
+      "id": "D02",
+      "shot_id": "S02",
+      "speaker": "<speaker-b>",
+      "text": "<source-dialogue-b>"
+    }
+  ],
+  "shots": [
+    {
+      "id": "S01",
+      "duration_seconds": 6,
+      "source_dialogue_ids": ["D01"],
+      "remake_dialogue": [
+        {
+          "source_id": "D01",
+          "speaker": "<speaker-a>",
+          "text": "<approved-remake-dialogue-a>"
+        }
+      ],
+      "visual": {
+        "description": "<action-and-blocking-a>",
+        "style": "<visual-style>",
+        "shot_size": "<shot-size>",
+        "camera_angle": "<height-pitch-roll>",
+        "camera_placement": "<position-relative-to-characters>",
+        "camera_movement": "<path-direction-speed-stability>",
+        "lens_focus": "<focal-length-feel-focus-depth>",
+        "composition": "<blocking-screen-direction-eyeline-headroom-lead-room>",
+        "continuity_constraints": "<what-must-match-before-and-after>",
+        "lighting": "<lighting>"
+      },
+      "audio": {
+        "bgm": "none",
+        "ambient": "preserve",
+        "voice": "lip-sync approved dialogue"
+      },
+      "generation_prompt": "<complete-shot-prompt-a>",
+      "negative_constraints": "<camera-and-continuity-failures-to-avoid>"
+    },
+    {
+      "id": "S02",
+      "duration_seconds": 6,
+      "source_dialogue_ids": ["D02"],
+      "remake_dialogue": [
+        {
+          "source_id": "D02",
+          "speaker": "<speaker-b>",
+          "text": "<approved-remake-dialogue-b>"
+        }
+      ],
+      "visual": {
+        "description": "<action-and-blocking-b-continuing-from-a>",
+        "style": "<visual-style>",
+        "shot_size": "<continue-a-shot-size-at-first-frame>",
+        "camera_angle": "<continue-a-height-pitch-roll>",
+        "camera_placement": "<continue-a-position-at-first-frame>",
+        "camera_movement": "<continue-a-direction-then-one-declared-movement>",
+        "lens_focus": "<continue-a-focus-and-depth>",
+        "composition": "<continue-a-blocking-screen-direction-eyeline>",
+        "continuity_constraints": "<inherit-a-tail-frame-exactly>",
+        "lighting": "<same-lighting-as-a>"
+      },
+      "audio": {
+        "bgm": "none",
+        "ambient": "preserve",
+        "voice": "lip-sync approved dialogue"
+      },
+      "generation_prompt": "<complete-shot-prompt-b>",
+      "negative_constraints": "<no-reset-no-jump-no-identity-drift>"
+    }
+  ],
+  "scene_references": [
+    {
+      "id": "R01",
+      "scene_id": "SC01",
+      "status": "planned",
+      "asset_pointer": "<scene-reference-image-path-or-url>",
+      "generation_prompt": "<full-scene-reference-image-prompt>",
+      "locks": {
+        "characters": "<faces-hair-body-height-relationship>",
+        "wardrobe": "<complete-outfits-shoes-accessories>",
+        "props": "<persistent-props>",
+        "environment": "<architecture-layout-entrances-fixed-objects>",
+        "lighting": "<time-weather-key-light-color-temperature>"
+      }
+    }
+  ],
+  "segments": [
+    {
+      "id": "A",
+      "sequence_index": 1,
+      "scene_id": "SC01",
+      "shot_ids": ["S01"],
+      "duration_seconds": 6,
+      "audio": {"bgm": "none"},
+      "generation_prompt": "<complete-segment-a-prompt>",
+      "negative_constraints": "<segment-a-negative-constraints>",
+      "generation_status": "planned",
+      "output_video_pointer": "<segment-a-video-path-url-or-asset-id>",
+      "continuity": {
+        "scene_reference_id": "R01",
+        "transition_from_previous": "opening",
+        "transition_reason": "",
+        "previous_segment_id": null,
+        "start_frame_pointer": null,
+        "tail_frame_pointer": "<segment-a-tail-frame-path-or-url>",
+        "tail_frame_timestamp_seconds": null,
+        "tail_frame_sha256": null,
+        "tail_frame_status": "planned"
+      }
+    },
+    {
+      "id": "B",
+      "sequence_index": 2,
+      "scene_id": "SC01",
+      "shot_ids": ["S02"],
+      "duration_seconds": 6,
+      "audio": {"bgm": "none"},
+      "generation_prompt": "<complete-segment-b-prompt-continuing-a-tail-frame>",
+      "negative_constraints": "<segment-b-negative-constraints>",
+      "generation_status": "planned",
+      "output_video_pointer": "<segment-b-video-path-url-or-asset-id>",
+      "continuity": {
+        "scene_reference_id": "R01",
+        "transition_from_previous": "continuous",
+        "transition_reason": "",
+        "previous_segment_id": "A",
+        "start_frame_pointer": "<segment-a-tail-frame-path-or-url>",
+        "tail_frame_pointer": "<segment-b-tail-frame-path-or-url>",
+        "tail_frame_timestamp_seconds": null,
+        "tail_frame_sha256": null,
+        "tail_frame_status": "planned"
+      }
+    }
+  ],
+  "omissions": []
+}

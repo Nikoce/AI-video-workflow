@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Video Workflow"
+  short_description: "锁定核心脚本并直接输出可复制的视频变体提示词流程"
+  default_prompt: "Use $ai-video-workflow to freeze a core script and output complete copy-ready prompts for isolated video variants."
