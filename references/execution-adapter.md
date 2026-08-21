@@ -13,7 +13,7 @@
 | 多参考输入 | 能同时使用场景参考图和首帧，或有可靠顺序上传方法 | 先锁场景图，再将尾帧作为强制首帧 |
 | 时长 | 支持当前片段长度 | 降低分段上限 |
 | 画幅与分辨率 | 支持用户目标 | 重新确认可接受参数 |
-| 声音 | 支持对白、音效、环境音或静音要求 | 拆成视频与后期音频两阶段 |
+| 声音 | 支持逐句对白文本、语言/地区变体、声音表演、唇形同步、音效、环境音或静音要求 | 拆成视频与后期音频两阶段；未确认台词路径时不得报告可执行 |
 | 结果证据 | 返回可查看文件、URL 或素材节点 | 不报告生成完成 |
 
 ## 能力记录
@@ -29,7 +29,9 @@
   "max_duration_seconds": 10,
   "supported_ratios": ["9:16"],
   "supported_resolutions": ["720p"],
-  "audio_mode": "native-or-post"
+  "audio_mode": "native-or-post",
+  "dialogue_mode": "native-lipsync-or-post-voice",
+  "supported_dialogue_languages": ["English/en-US"]
 }
 ```
 
@@ -48,6 +50,7 @@
 | `duration_seconds` | 时长参数 |
 | `ratio` / `resolution` | 输出规格 |
 | `audio` | 原生声音参数或后期音频计划 |
+| `dialogue_delivery_sheet` | 逐句对白、语言、表演、时间、唇形同步和字幕计划 |
 
 若执行器只能上传一张图，不能静默丢弃其中一个参考输入。停止并明确说明能力缺口。
 

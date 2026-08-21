@@ -1,11 +1,22 @@
 ---
 name: ai-video-workflow
-description: "Turn any reference video, ad, short-form clip, or script into a platform-neutral remake workflow: inspect source media, build shot/dialogue/narrative ledgers, map requested replacements, write executable camera prompts, split long stories into bounded generation segments, lock characters and locations with full-scene reference images, and generate segments sequentially by passing each accepted tail frame into the next start frame. Use for 爆款复刻、拉片复刻、同款视频、参考视频改编、长脚本分段生成、尾帧接首帧、人物场景一致性，or provider-independent video remake planning and execution."
+description: "Turn any reference video, ad, short-form clip, or script into a platform-neutral remake workflow: inspect source media, build shot/dialogue/narrative ledgers, generate complete English dialogue for spoken shots, apply Western-region and vivid-color defaults when unspecified, translate live-action Hollywood/Oscar-caliber cinematography into executable camera prompts, map requested replacements, split long stories into bounded generation segments, lock characters and locations with full-scene reference images, and generate segments sequentially by passing each accepted tail frame into the next start frame. Use for 爆款复刻、拉片复刻、同款视频、参考视频改编、长脚本分段生成、尾帧接首帧、人物场景一致性，or provider-independent video remake planning and execution."
 ---
 
 # 参考视频流程化复刻
 
 把参考视频复刻拆成可审计、可替换执行器的标准流程。不要绑定特定网站、模型、API 或生成平台。
+
+## 默认创作基线
+
+以下基线只在用户没有另行指定、且任务涉及新生成或改写内容时生效；用户明确要求、已确认的 `core_script` 和可验证的原片事实优先级更高：
+
+- `default_region`：欧美地区，默认采用北美或西欧的真人选角、建筑、街道、服装、道具、标识和社会语境。原片账本仍如实记录来源地域，不把推断写成原片事实。
+- `default_dialogue_language`：英语。新写或改写的对白默认使用自然、当代、适合欧美受众的英文；需要口音时明确写 `en-US`、`en-GB` 等语言变体，不用含糊的“英文口播”。
+- `default_color_profile`：丰富、鲜艳、层次清楚的彩色画面。高饱和但不溢色，肤色自然，保留阴影细节；除非用户要求，否则不使用灰暗、去饱和或单色方案。
+- `default_live_action_cinematography`：真人或写实人物默认采用奥斯卡级及好莱坞成熟叙事摄影的可执行特征：有动机的布光、清晰的空间调度、稳定的视线与轴线、明确的镜头选择和有目的的运镜。可以参考多位著名导演的镜头方法，但必须转译为焦段、机位、运动、构图、布光和色彩等参数，不直接复制在世导演的签名风格。
+
+每次任务在参数摘要中显式记录这些基线的实际取值；用户覆盖某一项时，只替换对应字段，其他默认值继续生效。
 
 ## 判定工作模式
 
@@ -32,7 +43,7 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 
 ### 1. 固定需求
 
-记录：用户原话、参考素材、目标时长、画幅、分辨率、语言、必须保留项、允许替换项、禁止改动项、声音要求和交付模式。
+记录：用户原话、参考素材、目标时长、画幅、分辨率、地域基线、对白语言、色彩基线、真人摄影基线、必须保留项、允许替换项、禁止改动项、声音要求和交付模式。
 
 分段不等于浓缩。除非用户明确要求压缩、删减或改写，否则保持原剧情、台词顺序和节拍。
 
@@ -44,7 +55,7 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 2. 指定视频首帧
 3. 同时使用场景参考图与首帧，或存在可靠的等价两阶段路径
 4. 目标比例、分辨率和片段时长
-5. 所需对白、环境音、音效或静音控制
+5. 所需对白（包括逐句文本、语言、声音表现和唇形同步）、环境音、音效或静音控制
 6. 返回可查看、可下载或可继续处理的结果
 
 缺少指定首帧能力时，不得承诺尾帧接力。改为 `prompt_package`，或在用户授权后更换执行器。
@@ -57,7 +68,7 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 - `台词账本`：台词 ID、镜头 ID、说话人、原文和顺序。
 - `叙事账本`：钩子、冲突、升级、反转、产品露出、证明点、CTA 和因果关系。
 
-听不清、看不清或无法验证的内容标记为 `待确认`，不写成事实。
+听不清、看不清或无法验证的内容标记为 `待确认`，不写成事实。对于新写或改写的成片，只要镜头包含说话，就必须产出完整可朗读的台词文本；不能只写“自然对话”“人物说出卖点”或省略号。
 
 ### 4. 建立替换矩阵与逐镜方案
 
@@ -76,7 +87,7 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 9. 完整生成提示词
 10. 替换来源与说明
 
-台词修改始终从完整台词账本重建，不从上一版被删减的 Prompt 继续改。
+台词修改始终从完整台词账本重建，不从上一版被删减的 Prompt 继续改。真人镜头的 `画面风格` 也必须从上述基线展开为具体的焦段、机位、调度、布光、色彩和质感，不能只保留“电影感”或导演姓名。
 
 ### 4A. 脚本变体模式
 
@@ -101,6 +112,36 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 
 输出格式固定为：`V01 变化说明` -> `完整可复制 Prompt` -> `核心不变检查`，然后再输出 V02、V03。长脚本按变体分别输出 `A 片段 Prompt`、`B 片段 Prompt` 等完整分段提示词，并在每段中写明上一段实际尾帧是首帧输入；不得只输出一份公共 Prompt 再让用户自行替换变量。
 
+### 4C. 台词生成与声音交付
+
+只要逐镜方案中存在对白、旁白、画外音或可听见的说话，交付物必须同时包含完整的 `dialogue_delivery_sheet` 和对应 Prompt 中的逐句台词。每行至少记录：
+
+1. 台词 ID、镜头 ID、说话人和准确文本
+2. 语言/地区变体（默认 `English`，必要时 `en-US` 或 `en-GB`）
+3. 起止时间或可用时长、估算字数和语速是否匹配
+4. 情绪、重音、停顿、音量、声音年龄/性别等表演要求
+5. 原生生成、后期配音或待确认的声音路径，以及是否需要唇形同步
+6. 字幕文本、字幕开关、位置和样式；没有字幕时明确写 `subtitles: none`
+
+字幕有单独的优先级规则：
+
+- 用户最新明确说“显示字幕”“要字幕”或等价表达时，字幕为强制要求，覆盖输入 Prompt 中较早的“不要字幕/不得出现字幕”约束；必须在完整 Prompt 中显式写 `subtitles: on`、逐句字幕文本、下方安全区位置和样式。
+- 有对白且用户要求字幕时，每句对白都要有对应的逐句字幕，字幕文本与最终台词逐字一致；“画面下方保留干净留白”应解释为“为字幕保留安全区”，不能解释成不显示字幕。
+- 用户没有明确要求时，保留已确认的字幕设置；输入 Prompt 自相矛盾时，在待确认项中指出冲突，不得默默选择 `subtitles: none`。
+
+输出模式按以下规则处理：
+
+- `analysis_only`：只转录和标记可验证的原台词；听不清处写 `待确认`，不擅自编造。
+- `prompt_package`、`variant_package`、`execute`：凡是要生成或改写的对白，都先写出完整英文台词，再嵌入逐镜和分段 Prompt；如果原片意图清楚但没有最终台词，可起草保留原意的英文版本并标记为 `待确认`，未确认前不得提交外部生成。
+- 台词必须在台词账本、逐镜方案、分段 Prompt 和最终验收记录中各出现一次且文本一致。字幕开启时，字幕文本也必须在台词交付表、逐镜 Prompt 和分段 Prompt 中各出现一次且与台词一致。禁止用“同上”“延续上一句”或只给差异补丁代替完整台词/字幕。
+- 按镜头时长核对口播容量；自然对白可先按约 `2.0-2.8 words/s` 估算，超出时缩短文本、增加时长或标记为待确认。没有对白的镜头明确写 `无对白`，并同步环境音、音效、BGM 和字幕策略。
+
+### 4D. 真人画面与色彩执行
+
+真人或写实人物的每个镜头至少写出一组完整的视觉执行参数：主体调度和视线、景别与焦段感、机位与运动、主光/辅光/轮廓光或自然光动机、曝光/对比度、色彩锚点和皮肤保护。默认采用鲜艳而可控的综合色彩，明确主色、辅色、背景色与色温变化；不得用“高级电影感”“奥斯卡风格”单独充当 Prompt。
+
+导演参考只用于提炼通用摄影方法，例如深焦空间调度、主观手持、精确正反打、长镜头节奏、广角近距离压迫感、长焦压缩、负空间或实景动机光。不得声称复刻某位导演本人，也不得让导演姓名替代可验证的镜头参数。
+
 ### 5. 划分生成片段
 
 按场景、人物、时间、动作和情绪连续性合并镜头。默认每段不超过 15 秒；执行器上限更低时采用更低上限。遇到空间跳转、时间跳转、情绪断点或超时，在自然叙事节点拆分。
@@ -120,7 +161,7 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 
 ### 7. 停在确认门
 
-展示完整台词、逐镜方案、分段方案、场景参考图方案、执行器能力检查和所有待确认项。用户明确确认前，不启动外部参考图或视频生成。
+展示完整台词/台词交付表、逐镜方案、分段方案、场景参考图方案、执行器能力检查和所有待确认项。用户明确确认前，不启动外部参考图或视频生成。
 
 ### 8. 串行生成与尾帧接力
 
@@ -138,7 +179,7 @@ description: "Turn any reference video, ad, short-form clip, or script into a pl
 
 ### 9. 验收与返工
 
-验收剧情、台词、人物、服装、道具、场景、品牌、声音、参数和每个片段接缝。失败时按镜头或片段 ID 定点返工，每次只设一个主要修正目标。
+验收剧情、逐句台词、语言/口音、唇形同步、人物、服装、道具、场景、品牌、声音、色彩、参数和每个片段接缝。失败时按镜头或片段 ID 定点返工，每次只设一个主要修正目标。
 
 ## 状态证据
 
@@ -167,6 +208,10 @@ Prompt 已写、任务已提交、进度已出现或路径已预填，都不等�
 - 不用相似图、重绘图或文字描述冒充实际尾帧。
 - 不在执行器不支持指定首帧时承诺无缝接力。
 - 不让逐镜与片段 Prompt 的声音要求互相冲突。
+- 有对白时必须交付完整、可朗读的台词；不以“自然对话”、省略号或仅有台词意图冒充台词生成。
+- 用户明确要求显示字幕时，必须输出 `subtitles: on`、完整逐句字幕文本、字幕位置和样式；不得继续沿用旧 Prompt 中的“不得出现字幕”。
+- 新生成内容在没有用户指定时默认使用欧美地域语境、英文对白和丰富鲜艳但不溢色的色彩；不得把这些默认值误写成原片事实。
+- 真人或写实人物必须把奥斯卡级/好莱坞摄影参考转译为具体镜头、调度、布光、色彩和声音参数；不得只写导演名或“电影感”。
 - 不只写“电影感”“手持感”等抽象标签；展开成可执行摄影参数。
 - 单个镜头只设一个主要运镜，最多增加一个不冲突的次要动作。
 - 用户说“核心脚本不变”时，不静默改写剧情、台词文本/语义、台词顺序、产品主张或 CTA。

@@ -127,6 +127,26 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
     for dialogue_id in sorted({item for item in source_dialogue_ids if source_dialogue_ids.count(item) > 1}):
         error(f"Duplicate source dialogue id: {dialogue_id}")
 
+    dialogue_delivery_sheet = as_list(plan.get("dialogue_delivery_sheet"))
+    delivery_by_id: dict[str, dict[str, Any]] = {}
+    for raw_delivery in dialogue_delivery_sheet:
+        delivery = as_dict(raw_delivery)
+        source_id = text(delivery.get("source_id"))
+        if not source_id:
+            error("Every dialogue_delivery_sheet row requires source_id.")
+            continue
+        if source_id in delivery_by_id:
+            error(f"Duplicate dialogue_delivery_sheet source_id: {source_id}")
+            continue
+        delivery_by_id[source_id] = delivery
+        if source_id not in source_dialogue_ids:
+            error(f"Dialogue delivery references unknown source dialogue id: {source_id}")
+        for field in ("shot_id", "speaker", "text", "language", "timing", "delivery", "voice_path", "subtitles", "subtitle_text", "subtitle_position", "subtitle_style"):
+            if not text(delivery.get(field)):
+                error(f"Dialogue delivery {source_id} requires non-empty {field}.")
+        if not isinstance(delivery.get("lip_sync"), bool):
+            error(f"Dialogue delivery {source_id} requires boolean lip_sync.")
+
     core_script = as_dict(plan.get("core_script"))
     variant_policy = as_dict(plan.get("variant_policy"))
     variants = as_list(plan.get("variants"))
@@ -300,6 +320,20 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
                 error(f"Source dialogue {source_id} is neither mapped nor explicitly omitted.")
             elif count > 1:
                 error(f"Source dialogue {source_id} is mapped or omitted more than once.")
+
+            if mapped_dialogue_ids.count(source_id) == 1:
+                delivery = delivery_by_id.get(source_id)
+                if not delivery:
+                    error(f"Source dialogue {source_id} requires a dialogue_delivery_sheet row.")
+                else:
+                    mapped_text = next(
+                        text(as_dict(raw_dialogue).get("text"))
+                        for raw_shot in shots
+                        for raw_dialogue in as_list(as_dict(raw_shot).get("remake_dialogue"))
+                        if text(as_dict(raw_dialogue).get("source_id")) == source_id
+                    )
+                    if text(delivery.get("text")) != mapped_text:
+                        error(f"Dialogue delivery {source_id} text must match its remake_dialogue text.")
 
     references = as_list(plan.get("scene_references"))
     if generation_plan_required and not references:

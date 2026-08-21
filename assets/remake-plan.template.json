@@ -6,7 +6,11 @@
     "resolution": "720p",
     "max_segment_seconds": 15,
     "generation_mode": "serial_tail_frame_chain",
-    "output_mode": "direct_variant_prompts"
+    "output_mode": "direct_variant_prompts",
+    "default_region": "Western Europe/North America",
+    "default_dialogue_language": "English",
+    "default_color_profile": "rich-vivid-controlled-skin-tones",
+    "default_live_action_cinematography": "award-caliber-Hollywood-visual-grammar"
   },
   "execution": {
     "adapter": {
@@ -19,7 +23,9 @@
       "max_duration_seconds": null,
       "supported_ratios": [],
       "supported_resolutions": [],
-      "audio_mode": "<native-post-or-none>"
+      "audio_mode": "<native-post-or-none>",
+      "dialogue_mode": "<native-lipsync-or-post-voice>",
+      "supported_dialogue_languages": ["English/en-US"]
     }
   },
   "source": {
@@ -102,6 +108,38 @@
       "text": "<source-dialogue-b>"
     }
   ],
+  "dialogue_delivery_sheet": [
+    {
+      "source_id": "D01",
+      "shot_id": "S01",
+      "speaker": "<speaker-a>",
+      "text": "<approved-remake-dialogue-a>",
+      "language": "English/en-US",
+      "timing": "<start-end-or-available-duration>",
+      "delivery": "<emotion-emphasis-pauses-volume>",
+      "voice_path": "<native-or-post-voice>",
+      "lip_sync": true,
+      "subtitles": "<on-or-off>",
+      "subtitle_text": "<same-text-or-none>",
+      "subtitle_position": "<bottom-safe-area-or-none>",
+      "subtitle_style": "<font-size-color-outline-or-none>"
+    },
+    {
+      "source_id": "D02",
+      "shot_id": "S02",
+      "speaker": "<speaker-b>",
+      "text": "<approved-remake-dialogue-b>",
+      "language": "English/en-US",
+      "timing": "<start-end-or-available-duration>",
+      "delivery": "<emotion-emphasis-pauses-volume>",
+      "voice_path": "<native-or-post-voice>",
+      "lip_sync": true,
+      "subtitles": "<on-or-off>",
+      "subtitle_text": "<same-text-or-none>",
+      "subtitle_position": "<bottom-safe-area-or-none>",
+      "subtitle_style": "<font-size-color-outline-or-none>"
+    }
+  ],
   "shots": [
     {
       "id": "S01",
@@ -111,7 +149,15 @@
         {
           "source_id": "D01",
           "speaker": "<speaker-a>",
-          "text": "<approved-remake-dialogue-a>"
+          "text": "<approved-remake-dialogue-a>",
+          "language": "English/en-US",
+          "timing": "<start-end-or-available-duration>",
+          "delivery": "<emotion-emphasis-pauses-volume>",
+          "lip_sync": true,
+          "subtitles": "<on-or-off>",
+          "subtitle_text": "<same-text-or-none>",
+          "subtitle_position": "<bottom-safe-area-or-none>",
+          "subtitle_style": "<font-size-color-outline-or-none>"
         }
       ],
       "visual": {
@@ -142,7 +188,15 @@
         {
           "source_id": "D02",
           "speaker": "<speaker-b>",
-          "text": "<approved-remake-dialogue-b>"
+          "text": "<approved-remake-dialogue-b>",
+          "language": "English/en-US",
+          "timing": "<start-end-or-available-duration>",
+          "delivery": "<emotion-emphasis-pauses-volume>",
+          "lip_sync": true,
+          "subtitles": "<on-or-off>",
+          "subtitle_text": "<same-text-or-none>",
+          "subtitle_position": "<bottom-safe-area-or-none>",
+          "subtitle_style": "<font-size-color-outline-or-none>"
         }
       ],
       "visual": {
