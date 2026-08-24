@@ -9,8 +9,11 @@
     "output_mode": "direct_variant_prompts",
     "default_region": "Western Europe/North America",
     "default_dialogue_language": "English",
+    "prompt_language": "Simplified Chinese except English spoken dialogue and matching subtitles",
+    "public_figure_ip_policy": "deidentified-original-inspired-only",
     "default_color_profile": "rich-vivid-controlled-skin-tones",
-    "default_live_action_cinematography": "award-caliber-Hollywood-visual-grammar"
+    "default_live_action_cinematography": "award-caliber-Hollywood-visual-grammar",
+    "subtitle_policy": "on-for-spoken-white-fill-black-outline"
   },
   "execution": {
     "adapter": {
@@ -119,10 +122,10 @@
       "delivery": "<emotion-emphasis-pauses-volume>",
       "voice_path": "<native-or-post-voice>",
       "lip_sync": true,
-      "subtitles": "<on-or-off>",
-      "subtitle_text": "<same-text-or-none>",
-      "subtitle_position": "<bottom-safe-area-or-none>",
-      "subtitle_style": "<font-size-color-outline-or-none>"
+      "subtitles": "on",
+      "subtitle_text": "<same-English-text>",
+      "subtitle_position": "画面下方安全区",
+      "subtitle_style": "白色文字内填充，黑色描边"
     },
     {
       "source_id": "D02",
@@ -134,10 +137,10 @@
       "delivery": "<emotion-emphasis-pauses-volume>",
       "voice_path": "<native-or-post-voice>",
       "lip_sync": true,
-      "subtitles": "<on-or-off>",
-      "subtitle_text": "<same-text-or-none>",
-      "subtitle_position": "<bottom-safe-area-or-none>",
-      "subtitle_style": "<font-size-color-outline-or-none>"
+      "subtitles": "on",
+      "subtitle_text": "<same-English-text>",
+      "subtitle_position": "画面下方安全区",
+      "subtitle_style": "白色文字内填充，黑色描边"
     }
   ],
   "shots": [
@@ -154,10 +157,10 @@
           "timing": "<start-end-or-available-duration>",
           "delivery": "<emotion-emphasis-pauses-volume>",
           "lip_sync": true,
-          "subtitles": "<on-or-off>",
-          "subtitle_text": "<same-text-or-none>",
-          "subtitle_position": "<bottom-safe-area-or-none>",
-          "subtitle_style": "<font-size-color-outline-or-none>"
+          "subtitles": "on",
+          "subtitle_text": "<same-English-text>",
+          "subtitle_position": "画面下方安全区",
+          "subtitle_style": "白色文字内填充，黑色描边"
         }
       ],
       "visual": {
@@ -193,10 +196,10 @@
           "timing": "<start-end-or-available-duration>",
           "delivery": "<emotion-emphasis-pauses-volume>",
           "lip_sync": true,
-          "subtitles": "<on-or-off>",
-          "subtitle_text": "<same-text-or-none>",
-          "subtitle_position": "<bottom-safe-area-or-none>",
-          "subtitle_style": "<font-size-color-outline-or-none>"
+          "subtitles": "on",
+          "subtitle_text": "<same-English-text>",
+          "subtitle_position": "画面下方安全区",
+          "subtitle_style": "白色文字内填充，黑色描边"
         }
       ],
       "visual": {

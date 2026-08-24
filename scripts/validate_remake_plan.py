@@ -34,6 +34,35 @@ def is_placeholder(value: str) -> bool:
     return value.startswith("<") and value.endswith(">")
 
 
+def has_white_fill_black_outline(value: Any) -> bool:
+    style = text(value)
+    lowered = style.casefold()
+    has_white = "白" in style or "white" in lowered
+    has_black = "黑" in style or "black" in lowered
+    has_fill = "填充" in style or "fill" in lowered
+    has_outline = "描边" in style or "边" in style or "outline" in lowered
+    return has_white and has_black and has_fill and has_outline
+
+
+def has_subtitle_on_instruction(value: Any) -> bool:
+    prompt = text(value)
+    lowered = prompt.casefold()
+    return (
+        "subtitles: on" in lowered
+        or "字幕：开启" in prompt
+        or "字幕: 开启" in prompt
+        or "显示字幕" in prompt
+    )
+
+
+def has_public_figure_ip_policy(value: Any) -> bool:
+    policy = text(value).casefold()
+    return (
+        "deidentified-original-inspired-only" in policy
+        or ("去标识化" in text(value) and "原创" in text(value))
+    )
+
+
 def same_pointer(left: Any, right: Any) -> bool:
     return bool(text(left)) and text(left).casefold() == text(right).casefold()
 
@@ -79,6 +108,7 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
         error("settings.max_segment_seconds must be greater than 0 and no more than 15.")
     if text(settings.get("generation_mode")) != "serial_tail_frame_chain":
         error("settings.generation_mode must be serial_tail_frame_chain.")
+    prompt_language = text(settings.get("prompt_language"))
     output_mode = text(settings.get("output_mode"))
     if output_mode and output_mode not in OUTPUT_MODES:
         error("settings.output_mode must be direct_variant_prompts or matrix_only.")
@@ -88,6 +118,16 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
         warn("settings.ratio is empty.")
     if not text(settings.get("resolution")):
         warn("settings.resolution is empty.")
+    if generation_plan_required:
+        if not prompt_language:
+            error("Generation plans require settings.prompt_language.")
+        elif "简体中文" not in prompt_language and "simplified chinese" not in prompt_language.casefold():
+            error("settings.prompt_language must require Simplified Chinese prompt prose.")
+        if not has_public_figure_ip_policy(settings.get("public_figure_ip_policy")):
+            error(
+                "Generation plans require settings.public_figure_ip_policy="
+                "deidentified-original-inspired-only (public figures and IP must become original de-identified characters)."
+            )
 
     execution = as_dict(plan.get("execution"))
     adapter = as_dict(execution.get("adapter"))
@@ -146,6 +186,13 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
                 error(f"Dialogue delivery {source_id} requires non-empty {field}.")
         if not isinstance(delivery.get("lip_sync"), bool):
             error(f"Dialogue delivery {source_id} requires boolean lip_sync.")
+        if generation_plan_required:
+            if text(delivery.get("subtitles")).casefold() != "on":
+                error(f"Dialogue delivery {source_id} requires subtitles=on for spoken content.")
+            if text(delivery.get("subtitle_text")) != text(delivery.get("text")):
+                error(f"Dialogue delivery {source_id} subtitle_text must match spoken text exactly.")
+            if not has_white_fill_black_outline(delivery.get("subtitle_style")):
+                error(f"Dialogue delivery {source_id} subtitle_style must specify white fill and black outline.")
 
     core_script = as_dict(plan.get("core_script"))
     variant_policy = as_dict(plan.get("variant_policy"))
@@ -289,7 +336,8 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
         except (TypeError, ValueError):
             error(f"Shot {shot_id} duration_seconds must be numeric.")
 
-        for raw_dialogue in as_list(shot.get("remake_dialogue")):
+        remake_dialogues = as_list(shot.get("remake_dialogue"))
+        for raw_dialogue in remake_dialogues:
             dialogue = as_dict(raw_dialogue)
             source_id = text(dialogue.get("source_id"))
             if not source_id:
@@ -300,6 +348,30 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
                 error(f"Shot {shot_id} maps unknown source dialogue id: {source_id}")
             if not text(dialogue.get("text")):
                 error(f"Shot {shot_id} maps {source_id} to empty dialogue text.")
+            if generation_plan_required:
+                if text(dialogue.get("subtitles")).casefold() != "on":
+                    error(f"Shot {shot_id} dialogue {source_id} requires subtitles=on.")
+                if text(dialogue.get("subtitle_text")) != text(dialogue.get("text")):
+                    error(f"Shot {shot_id} dialogue {source_id} subtitle_text must match spoken text exactly.")
+                if not has_white_fill_black_outline(dialogue.get("subtitle_style")):
+                    error(f"Shot {shot_id} dialogue {source_id} subtitle_style must specify white fill and black outline.")
+        if generation_plan_required and remake_dialogues:
+            if not has_subtitle_on_instruction(shot.get("generation_prompt")):
+                error(f"Shot {shot_id} generation_prompt must explicitly enable subtitles for spoken content.")
+            if not has_white_fill_black_outline(shot.get("generation_prompt")):
+                error(f"Shot {shot_id} generation_prompt must specify white fill and black outline subtitles.")
+
+    if generation_plan_required and source_dialogue_ids:
+        for raw_variant in variants:
+            variant = as_dict(raw_variant)
+            variant_id = text(variant.get("id")) or "unknown"
+            prompt = text(variant.get("generation_prompt"))
+            if not prompt:
+                continue
+            if not has_subtitle_on_instruction(prompt):
+                error(f"Variant {variant_id} generation_prompt must explicitly enable subtitles for spoken content.")
+            if not has_white_fill_black_outline(prompt):
+                error(f"Variant {variant_id} generation_prompt must specify white fill and black outline subtitles.")
 
     omission_ids: list[str] = []
     for raw_omission in as_list(plan.get("omissions")):
@@ -393,12 +465,14 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
 
         computed_duration = 0.0
         shot_bgms: set[str] = set()
+        segment_has_spoken_content = False
         for shot_id_value in as_list(segment.get("shot_ids")):
             shot_id = text(shot_id_value)
             if shot_id not in shot_by_id:
                 error(f"Segment {segment_id} references unknown shot id: {shot_id}")
                 continue
             segmented_shot_ids.append(shot_id)
+            segment_has_spoken_content = segment_has_spoken_content or bool(as_list(shot_by_id[shot_id].get("remake_dialogue")))
             try:
                 computed_duration += float(shot_by_id[shot_id].get("duration_seconds"))
             except (TypeError, ValueError):
@@ -421,6 +495,11 @@ def validate(plan: dict[str, Any], phase: str, target_segment_id: str | None) ->
         segment_bgm = text(as_dict(segment.get("audio")).get("bgm"))
         if len(shot_bgms) == 1 and segment_bgm not in shot_bgms:
             error(f"Segment {segment_id} BGM conflicts with its shot-level requirement.")
+        if generation_plan_required and segment_has_spoken_content:
+            if not has_subtitle_on_instruction(segment.get("generation_prompt")):
+                error(f"Segment {segment_id} generation_prompt must explicitly enable subtitles for spoken content.")
+            if not has_white_fill_black_outline(segment.get("generation_prompt")):
+                error(f"Segment {segment_id} generation_prompt must specify white fill and black outline subtitles.")
 
         reference_id = text(continuity.get("scene_reference_id"))
         if reference_id not in reference_by_id:

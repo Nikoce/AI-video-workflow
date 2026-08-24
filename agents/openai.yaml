@@ -1,4 +1,4 @@
 interface:
   display_name: "AI Video Workflow"
-  short_description: "锁定核心脚本、生成完整英文台词并输出可复制的视频变体提示词"
-  default_prompt: "Use $ai-video-workflow to freeze a core script, generate complete English dialogue for every spoken shot, and output copy-ready prompts for isolated video variants with Western-region, vivid-color, and executable live-action cinematography defaults."
+  short_description: "输出中文提示词、英文口播、白字黑边字幕并去标识化人物/IP"
+  default_prompt: "使用 $ai-video-workflow：无论参考图、参考视频或脚本来自哪里，输出简体中文 Prompt；所有口播写成完整英文，并为每个口播镜头强制加入白色填充、黑色描边字幕；参考中若有公众人物或 IP，只改写为不含姓名、Logo、角色名和直接模仿要求的原创角色。"
