@@ -1,6 +1,6 @@
 ---
 name: ai-video-workflow
-description: "Turn any reference image, video, ad, short-form clip, or script into a platform-neutral remake workflow: inspect source media, build shot/dialogue/narrative ledgers, output Chinese prompt prose with complete English spoken lines, force white-fill black-outline subtitles for every spoken shot, de-identify public figures and IP into original characters without names or direct identity references, apply Western-region and vivid-color defaults when unspecified, translate live-action Hollywood/Oscar-caliber cinematography into executable camera prompts, map requested replacements, split long stories into bounded generation segments, lock characters and locations with full-scene reference images, and generate segments sequentially by passing each accepted tail frame into the next start frame. Use for 爆款复刻、拉片复刻、同款视频、参考图改编、参考视频改编、长脚本分段生成、尾帧接首帧、人物场景一致性，or provider-independent video remake planning and execution."
+description: "Turn reference images, videos, ads, clips, or scripts into platform-neutral AI video remake workflows. Inspect media; build shot, dialogue, and narrative ledgers; write Chinese prompts with complete English spoken lines and white-fill black-outline subtitles; de-identify public figures and IP; map replacements and isolated variants; segment long stories; lock scene continuity; and hand accepted tail frames into later segments. Also write concise Seedance 2.5 first/last-frame prompts for natural idle breathing and believable anger loops. Use for 爆款复刻、拉片复刻、同款视频、参考图或视频改编、脚本变体、首尾帧动画、首尾帧一致、待机动画、生气动画、长脚本分段、尾帧接首帧、人物场景一致性。"
 ---
 
 # 参考素材流程化复刻
@@ -61,12 +61,24 @@ description: "Turn any reference image, video, ad, short-form clip, or script in
 
 本地参考素材默认只在本地分析。上传文件、提交任务、消耗额度或调用付费服务前，必须有与目标平台对应的用户授权。
 
+## 首尾帧动画专项入口
+
+当用户要求首尾帧动画、循环待机、自然呼吸或生气动作时，标记 `task_profile: first_last_frame_animation`，但仍单独记录交付模式；写好 Prompt 不等于获得外部生成授权。
+
+先判定端点关系：
+
+- `same_frame_loop`：首帧和尾帧是同一张图，或用户明确要求首尾帧一致。动作必须自然展开并真实回到相同人物状态、构图和环境，不用淡化、遮罩、溶解、倒放或硬切伪造回环。
+- `directed_transition`：首帧与尾帧是两张不同图片。动作应自然到达指定尾帧；不得错误要求回到首帧。
+
+只有一张角色图且用户要待机或生气循环时，默认按 `same_frame_loop` 写 Prompt。先识别图片中可验证的人物、姿势、表情、服装、道具、背景、左右方位与安全边距；不清楚的细节标记 `待确认`，不臆造。面向 Seedance 2.5 时按“素材职责 + 2–3 段时间动作 + 一句固定约束”写短 Prompt，只保留影响动作的角色锚点。每种状态都要交付独立、完整、可复制的 Prompt。详细动作语法、节奏、模板和验收规则见 [first-last-frame-animation-prompts.md](references/first-last-frame-animation-prompts.md)。
+
 ## 读取资源
 
 - 开始任务时读取 [workflow.md](references/workflow.md)，按状态机推进。
 - 选择或更换生成工具时读取 [execution-adapter.md](references/execution-adapter.md)，先完成能力检查。
 - 编写视频提示词前读取 [camera-prompt-language.md](references/camera-prompt-language.md)。
 - 改写、确认、生成和验收前读取 [quality-gates.md](references/quality-gates.md)。
+- 任务涉及首尾帧动画、同帧循环、待机或生气动作时读取 [first-last-frame-animation-prompts.md](references/first-last-frame-animation-prompts.md)。
 - 本地视频存在时，运行 `scripts/inspect_reference.py`；读取不到的字段保持未知。
 - 复杂任务复制 `assets/remake-plan.template.json`，用 `scripts/validate_remake_plan.py` 校验。
 - 每个连续片段验收后，运行 `scripts/extract_tail_frame.py` 提取实际交接帧。
@@ -239,6 +251,8 @@ Prompt 已写、任务已提交、进度已出现或路径已预填，都不等�
 - 不丢失开场、转折、证明点或 CTA。
 - 不把分段自动变成压缩剧情或缩写对白。
 - 不用相似图、重绘图或文字描述冒充实际尾帧。
+- 不把 Prompt 中的“首尾帧一致”当成成片证据；成片必须解码首尾有效帧后再判断，严格一致要求逐像素或等价的确定性检查。
+- 同帧循环不靠淡化、遮罩、溶解、倒放、硬切、冻结尾帧或后期替换尾帧伪造一致；用户明确要求后期修复时另行记录原片与修复版。
 - 不在执行器不支持指定首帧时承诺无缝接力。
 - 不让逐镜与片段 Prompt 的声音要求互相冲突。
 - 有对白时必须交付完整、可朗读的台词；不以“自然对话”、省略号或仅有台词意图冒充台词生成。
