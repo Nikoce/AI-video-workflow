@@ -1,6 +1,6 @@
 ---
 name: ai-video-workflow
-description: "Turn reference images, videos, ads, clips, or scripts into platform-neutral AI video remake workflows. Inspect media; build shot, dialogue, and narrative ledgers; write Chinese prompts with complete English spoken lines and white-fill black-outline subtitles; de-identify public figures and IP; map replacements and isolated variants; segment long stories; lock scene continuity; and hand accepted tail frames into later segments. Also write concise Seedance 2.5 first/last-frame prompts for natural idle breathing and believable anger loops. Use for 爆款复刻、拉片复刻、同款视频、参考图或视频改编、脚本变体、首尾帧动画、首尾帧一致、待机动画、生气动画、长脚本分段、尾帧接首帧、人物场景一致性。"
+description: "Turn reference images, videos, ads, clips, or scripts into platform-neutral AI video remake workflows. Inspect media; build shot, dialogue, and narrative ledgers; write structured Chinese prompts with complete English spoken lines; de-identify public figures and IP; map replacements and isolated variants; segment long stories; lock scene continuity; and hand accepted tail frames into later segments. Includes Seedance 2.5 prompt structure, capability boundaries, content-audit troubleshooting, and concise first/last-frame animation prompts. Use for 爆款复刻、拉片复刻、同款视频、参考图或视频改编、脚本变体、Seedance 2.5 提示词、内容审核失败改写、首尾帧动画、待机动画、生气动画、长脚本分段、尾帧接首帧、人物场景一致性。"
 ---
 
 # 参考素材流程化复刻
@@ -72,6 +72,19 @@ description: "Turn reference images, videos, ads, clips, or scripts into platfor
 
 只有一张角色图且用户要待机或生气循环时，默认按 `same_frame_loop` 写 Prompt。先识别图片中可验证的人物、姿势、表情、服装、道具、背景、左右方位与安全边距；不清楚的细节标记 `待确认`，不臆造。面向 Seedance 2.5 时按“素材职责 + 2–3 段时间动作 + 一句固定约束”写短 Prompt，只保留影响动作的角色锚点。每种状态都要交付独立、完整、可复制的 Prompt。详细动作语法、节奏、模板和验收规则见 [first-last-frame-animation-prompts.md](references/first-last-frame-animation-prompts.md)。
 
+## Seedance 2.5 专项入口
+
+当用户指定 Seedance 2.5、要求按其官方结构优化提示词，或遇到 `Content security audit did not pass`、`内容安全审查未通过` 等上游审核错误时，读取 [seedance-2.5-prompt-guide.md](references/seedance-2.5-prompt-guide.md)。
+
+执行时遵守以下边界：
+
+- 先区分 `model_capability`、`adapter_limit` 和 `content_audit`。模型支持 30 秒不代表每个接入平台都开放相同的时长、分辨率、参考素材数量或提示词长度。
+- 官方公开资料未给出跨平台统一的 Seedance 2.5 提示词字符上限或完整敏感词表。不得把社区文章、第三方封装或单一接入商的限制写成统一官方限制；精确上限以当前执行器的字段文档和实际报错为准。
+- 提示词默认按“格式 → 主体 → 动作 → 环境 → 摄影机 → 视觉 → 时间节拍 → 声音与约束”组织。不可变要求前置，动作写成可观察行为，长片段用时间码分配节拍。
+- 负面约束只保留与成片直接相关的短句，集中放在末尾。不要为了排除风险而罗列长篇敏感词黑名单，因为审核器可能先识别字面内容而忽略否定语境。
+- 对正常科普、广告或叙事内容出现审核误判时，只改变容易触发审核的措辞和结构，保留用户冻结的画面、人物、镜头、台词、时长和 CTA。可改为中性、可观察、非诊断式的画面描述，但不得用谐音、拆字、编码或隐语绕过真正违规内容的审核。
+- 若提示词改写后仍失败，先读取上游错误详情并检查文字、参考图、参考视频和音频各自的审核结果；未经用户授权，不自动重提可能计费的任务。
+
 ## 读取资源
 
 - 开始任务时读取 [workflow.md](references/workflow.md)，按状态机推进。
@@ -79,6 +92,7 @@ description: "Turn reference images, videos, ads, clips, or scripts into platfor
 - 编写视频提示词前读取 [camera-prompt-language.md](references/camera-prompt-language.md)。
 - 改写、确认、生成和验收前读取 [quality-gates.md](references/quality-gates.md)。
 - 任务涉及首尾帧动画、同帧循环、待机或生气动作时读取 [first-last-frame-animation-prompts.md](references/first-last-frame-animation-prompts.md)。
+- 任务指定 Seedance 2.5、要求官方结构优化或排查内容审核错误时读取 [seedance-2.5-prompt-guide.md](references/seedance-2.5-prompt-guide.md)。
 - 本地视频存在时，运行 `scripts/inspect_reference.py`；读取不到的字段保持未知。
 - 复杂任务复制 `assets/remake-plan.template.json`，用 `scripts/validate_remake_plan.py` 校验。
 - 每个连续片段验收后，运行 `scripts/extract_tail_frame.py` 提取实际交接帧。
