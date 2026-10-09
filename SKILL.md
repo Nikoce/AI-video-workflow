@@ -1,6 +1,6 @@
 ---
 name: ai-video-workflow
-description: "Turn reference images, videos, ads, clips, or scripts into platform-neutral AI video remake workflows. Inspect media; build shot, dialogue, and narrative ledgers; write structured Chinese prompts with complete English spoken lines; de-identify public figures and IP; map replacements and isolated variants; segment long stories; lock scene continuity; and hand accepted tail frames into later segments. Includes Seedance 2.5 prompt structure, capability boundaries, content-audit troubleshooting, and concise first/last-frame animation prompts. Use for 爆款复刻、拉片复刻、同款视频、参考图或视频改编、脚本变体、Seedance 2.5 提示词、内容审核失败改写、首尾帧动画、待机动画、生气动画、长脚本分段、尾帧接首帧、人物场景一致性。"
+description: "Turn reference images, videos, ads, clips, or scripts into platform-neutral AI video remake workflows. Inspect media; build shot, dialogue, and narrative ledgers; write structured Chinese prompts with complete English spoken lines; de-identify public figures and IP; map replacements and isolated variants; segment long stories; lock scene continuity; and hand accepted tail frames into later segments. Includes Seedance 2.5 prompt structure, capability boundaries, content-audit troubleshooting, concise first/last-frame animation prompts, and the 3D箭头HOOK workflow for converting arbitrary photos, illustrations, objects, characters, or existing arrow artwork into thin hollow-arrow designs and animations. Use for 爆款复刻、拉片复刻、同款视频、参考图或视频改编、脚本变体、Seedance 2.5 提示词、3D箭头HOOK、3D Arrow Hook、任意图片转3D箭头、箭头迷宫动画、内容审核失败改写、首尾帧动画、待机动画、生气动画、长脚本分段、尾帧接首帧、人物场景一致性。"
 ---
 
 # 参考素材流程化复刻
@@ -107,6 +107,12 @@ description: "Turn reference images, videos, ads, clips, or scripts into platfor
 - 对正常科普、广告或叙事内容出现审核误判时，只改变容易触发审核的措辞和结构，保留用户冻结的画面、人物、镜头、台词、时长和 CTA。可改为中性、可观察、非诊断式的画面描述，但不得用谐音、拆字、编码或隐语绕过真正违规内容的审核。
 - 若提示词改写后仍失败，先读取上游错误详情并检查文字、参考图、参考视频和音频各自的审核结果；未经用户授权，不自动重提可能计费的任务。
 
+## 3D箭头HOOK 专项入口
+
+当用户希望把任意上传图片中的人物、动物、交通工具、产品、植物、建筑、风景或抽象图形转成细箭头组成的三维镂空设计或动画时，标记 `task_profile: 3d_arrow_hook`，读取 [3d-arrow-hook-workflow.md](references/3d-arrow-hook-workflow.md)。输入既可以是普通照片/插画，也可以是已经完成的箭头迷宫图。`3D Arrow Hook`、`任意图片转3D箭头`、`箭头迷宫3D动画`、`空心箭头物体动画`视为同一类别的检索别名。
+
+这一类别先判定输入模式：已有箭头图可直接动画；普通图片应先建立可验收的箭头化目标静帧，再制作视频；用户另给箭头尾帧时以该尾帧为几何与构图权威。随后判读主体拓扑、朝向、入场边界、辅助场景和颜色语义，并按对象结构选择原位分层展开、关节飞行、人物微动作、远处靠近绕轴或步态转向等一个主要动画模式。返工时冻结用户指定的基准版本，只修改本轮明确提出的变化轴，不叠加上一轮未获认可的改动。
+
 ## 读取资源
 
 - 开始任务时读取 [workflow.md](references/workflow.md)，按状态机推进。
@@ -115,6 +121,7 @@ description: "Turn reference images, videos, ads, clips, or scripts into platfor
 - 改写、确认、生成和验收前读取 [quality-gates.md](references/quality-gates.md)。
 - 任务涉及首尾帧动画、同帧循环、待机或生气动作时读取 [first-last-frame-animation-prompts.md](references/first-last-frame-animation-prompts.md)。
 - 任务指定 Seedance 2.5、要求官方结构优化或排查内容审核错误时读取 [seedance-2.5-prompt-guide.md](references/seedance-2.5-prompt-guide.md)。
+- 任务属于 `3d_arrow_hook` 时读取 [3d-arrow-hook-workflow.md](references/3d-arrow-hook-workflow.md)，执行精细图片识别、箭头化设计、动画模式选择、尾帧衔接、批量跳过、返工和版本管理。
 - 本地视频存在时，运行 `scripts/inspect_reference.py`；读取不到的字段保持未知。
 - 复杂任务复制 `assets/remake-plan.template.json`，用 `scripts/validate_remake_plan.py` 校验。
 - 每个连续片段验收后，运行 `scripts/extract_tail_frame.py` 提取实际交接帧。
